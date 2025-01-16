@@ -3,80 +3,51 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import AuthContext from '../context/AuthContext';
 import Alert from 'react-bootstrap/Alert';
+import { useForm } from 'react-hook-form'
+import axios from 'axios'
 
 export default function Login() {
     const { login, changeAuthType } = useContext(AuthContext)
-    const [error, setError] = useState({ showError: false, message: "" })
+    const { register, handleSubmit, formState:{errors}} = useForm()
 
-    // stores username and password
-    const [loginData, setLoginData] = useState({
-        username: "",
-        password: "",
-    })
+    const onSubmit = async (formData)=>{
 
-    // Sends login data to the server
-    function handleSubmit(event) {
-        event.preventDefault(); // prevent page from refreshing after clicking submit button(login Button)
+        try{
+            const response = await axios.post('/api/users/login',formData,{headers:{
+                "Content-Type": "application/json"
+            }})
 
-
-        if (loginData.username && loginData.password) { // Checks if the user has entered a username and password
-            (async function () {
-                try {
-                    const response = await fetch('/api/users/login',
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify(loginData)
-                        }
-                    )
-
-                    const user = await response.json();
-                    if (user.isAuthenticated) {
-                        login(user)// set user context state
-                        changeAuthType(2)
-                        setLoginData(prevData => { return { ...prevData, username: "", password: "" } }) // reset the form values
-                    } else {
-                        setError(prev => {
-                            return { ...prev, showError: true, message: user.error }
-                        })
-                    }
-                } catch (e) {
-                    console.log(e)
-                }
-            })();
+            if(response.status ===200){
+                login(response.data)
+                changeAuthType(2)
+            }
+    
+        }catch(error){
+            console.error(error.message)
         }
 
     }
 
-    // Get the form data and update the state
-    function onChangeHandler(event) {
-        const { name, value } = event.target
-
-        // get login credentials from text fields
-        setLoginData(prevLoginData => {
-            return {
-                ...prevLoginData,
-                [name]: value
-            }
-        })
-
-        setError({ showError: false, message: "" }) // clear the login form values
-    }
-
-
     return (
-        <Form className='p-2' onSubmit={handleSubmit}>
-            {error.showError && <Alert variant="danger"> {error.message}</Alert>}
+        <Form className='p-2' onSubmit={handleSubmit(onSubmit)}>
             <Form.Group className="mb-3" controlId="LoginformBasicUsername">
                 <Form.Label>Username</Form.Label>
-                <Form.Control required onChange={onChangeHandler} name='username' value={loginData.username} type="text" placeholder="Enter Username" />
+                <Form.Control
+                    type="text" 
+                    placeholder="Enter Username"
+                    {...register('username',{required:true})}
+                />
+                { errors?.username?.type == "required" && <Alert variant="danger" className='my-1 p-1'>"Username is requried!"</Alert>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="LoginformBasicPassword">
                 <Form.Label>Password</Form.Label>
-                <Form.Control required onChange={onChangeHandler} name='password' value={loginData.password} type="password" placeholder="Password" />
+                <Form.Control 
+                    type="password"
+                    placeholder="Password" 
+                    {...register('password',{required:true})}
+                />
+                { errors?.password?.type == "required" && <Alert variant="danger" className='my-1 p-1'>"Username is requried!"</Alert>}
             </Form.Group>
 
             <Button type="submit" variant="primary" className='w-100'>
