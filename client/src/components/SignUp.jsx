@@ -3,99 +3,66 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import AuthContext from '../context/AuthContext'
 import Alert from 'react-bootstrap/Alert';
+import { useForm } from 'react-hook-form'
+import axios from 'axios';
 
 export default function SingUp() {
     const { login, changeAuthType } = useContext(AuthContext)
-    const [error, setError] = useState({ showError: false, message: "" })
 
-    const [signUpData, setSignUpData] = useState({
-        username: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-    })
+    const { watch,register,handleSubmit,formState:{errors}} = useForm()
 
-    // sends signup form data to the server
-    function handleSubmit(event) {
-        event.preventDefault(); // Prevents the page from reloading after clicking the submit button
+    const onSubmit = async (formData)=>{
 
-        // check password and confirm password is equal
-        if (signUpData.password !== signUpData.confirmPassword) {
-            setError({ showError: true, message: "passwords don't match!" })
-        } else {
-            if (signUpData.username && signUpData.email) {
-                (async function () {
-                    try {
-                        const response = await fetch('/api/users/register',
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify(signUpData)
-                            }
-                        )
+        try{
+            const response = await axios.post('/api/users/register',formData,{headers:{
+                "Content-Type": "application/json"
+            }})
 
-                        const user = await response.json();
-
-                        if (user.isAuthenticated) { // check if the user has successfully signed up
-                            login(user)// set user context state
-                            changeAuthType(3)
-                            setSignUpData({
-                                username: "",
-                                email: "",
-                                password: "",
-                                confirmPassword: ""
-                            })
-                        } else {
-                            setError(prev => {
-                                return { ...prev, showError: true, message: user.error }
-                            })
-                        }
-
-                    } catch (e) {
-                        return console.log(e)
-                    }
-                })();
+            if(response.status ===200){
+                login(response.data)
+                changeAuthType(3)
             }
-            setError({ showError: false, message: "" })
+    
+        }catch(error){
+            console.error(error.message)
         }
+
     }
 
-    // Retrieve the signup form data and update the signup state accordingly
-    function onChangeHandler(event) {
-        const { name, value } = event.target
-        setSignUpData(prevSignUpData => {
-            return {
-                ...prevSignUpData,
-                [name]: value
-            }
-        })
-
-        setError({ showError: false, message: "" }) // stop showing the error when new values entered to the text field
-    }
 
     return (
-        <Form onSubmit={handleSubmit} className='p-2'>
-            {error.showError && <Alert variant="danger"> {error.message}</Alert>}
+        <Form onSubmit={handleSubmit(onSubmit)} className='p-2'>
+            
             <Form.Group className="mb-3" controlId="formBasicUsername">
                 <Form.Label>Username</Form.Label>
-                <Form.Control required onChange={onChangeHandler} name='username' value={signUpData.username} type="text" placeholder="Enter Username" />
+                <Form.Control {...register('username',{required:true})} type="text" placeholder="Enter Username" />
+                { errors?.username?.type == "required" && <Alert variant="danger" className='my-1 p-1'>"Username is requried!"</Alert>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicEmail">
                 <Form.Label>Email Addres</Form.Label>
-                <Form.Control required onChange={onChangeHandler} name='email' value={signUpData.email} type="email" placeholder="Email" />
+                <Form.Control {...register('email',{required:true})} type="email" placeholder="Email" />
+                { errors?.email?.type == "required" && <Alert variant="danger" className='my-1 p-1'>"email is requried!"</Alert>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
                 <Form.Label>Password</Form.Label>
-                <Form.Control required onChange={onChangeHandler} name='password' value={signUpData.password} type="password" placeholder="Password" />
+                <Form.Control {...register('password',{required:true})} type="password" placeholder="Password" />
+                { errors?.password?.type == "required" && <Alert variant="danger" className='my-1 p-1'>"password is requried!"</Alert>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
                 <Form.Label>Confirm Password</Form.Label>
-                <Form.Control required onChange={onChangeHandler} name='confirmPassword' value={signUpData.confirmPassword} type="password" placeholder="Password" />
+                <Form.Control 
+                    {...register('confirmPassword',{required:"confirm passowrd is required!",validate:(value)=>{
+                        if(watch('password') !== value){
+                            return "passowrds don't match!"
+                        }
+                    }})} 
+                     type="password" 
+                    placeholder="Password" 
+                 />
+                { errors?.confirmPassword && <Alert variant="danger" className='my-1 p-1'>{errors?.confirmPassword?.message}</Alert>}
             </Form.Group>
 
             <Button variant="primary" type="submit" className='w-100'>
