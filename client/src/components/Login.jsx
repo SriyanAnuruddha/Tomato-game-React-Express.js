@@ -4,7 +4,7 @@ import Form from 'react-bootstrap/Form';
 import AuthContext from '../context/AuthContext';
 import Alert from 'react-bootstrap/Alert';
 import { useForm } from 'react-hook-form'
-import axios from 'axios'
+import { API_Request } from '../utils/APIRequest';
 
 export default function Login() {
     const { login, changeAuthType } = useContext(AuthContext)
@@ -13,9 +13,7 @@ export default function Login() {
     const onSubmit = async (formData)=>{
 
         try{
-            const response = await axios.post('/api/users/login',formData,{headers:{
-                "Content-Type": "application/json"
-            }})
+            const response = await API_Request.post('users/login',formData)
 
             if(response.status ===200){
                 const { userData, access_token } = response.data

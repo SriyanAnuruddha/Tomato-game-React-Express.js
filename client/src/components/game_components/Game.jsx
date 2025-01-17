@@ -12,7 +12,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 import Cube from './Cube';
 import { nanoid } from "nanoid";
-import axios from 'axios';
+import { API_Request } from '../../utils/APIRequest';
 
 export default function Game() {
     const [level, setLevel] = useState(1)
@@ -40,9 +40,8 @@ export default function Game() {
             })
 
             try {
-                const response = await axios.get('/api/game/newgame',{
+                const response = await API_Request.get('/game/newgame',{
                      headers: {
-                    "Content-Type": "application/json",
                     'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                 }})
 
@@ -85,12 +84,11 @@ export default function Game() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await axios.post('/api/users/store-score',{ 
+                const response = await API_Request.post('/users/store-score',{ 
                     score: currentScore 
                 },
                 {
                     headers: {
-                        "Content-Type": "application/json",
                         'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     }
                 }

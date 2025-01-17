@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AuthContext from "./AuthContext";
 import axios from "axios";
+import { API_Request } from "../utils/APIRequest";
 
 export default function AuthProvider({ children }) {
     const [authUser, setAuthUser] = useState({})
@@ -18,7 +19,7 @@ export default function AuthProvider({ children }) {
        
         (async ()=>{
             try{          
-                const response = await axios.get('/api/users/authenticate',{
+                const response = await API_Request.get('users/authenticate',{
                     headers:{
                         'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     }

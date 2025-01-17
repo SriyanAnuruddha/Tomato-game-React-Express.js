@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import ListGroup from 'react-bootstrap/ListGroup';
 import Card from 'react-bootstrap/Card';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { API_Request } from '../../utils/APIRequest';
 
 export default function GameWonModal(props) {
     const [quoteObj, setQuoteObj] = useState({})
@@ -13,10 +13,9 @@ export default function GameWonModal(props) {
     useEffect(() => {
         (async () => {
             try{
-                const response = await axios.get("/api/game/quote",
+                const response = await API_Request.get("/game/quote",
                 {
                     headers:{
-                        "Content-Type": "application/json",
                         'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     }
                 })
