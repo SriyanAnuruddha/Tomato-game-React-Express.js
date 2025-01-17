@@ -12,6 +12,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 import Cube from './Cube';
 import { nanoid } from "nanoid";
+import axios from 'axios';
 
 export default function Game() {
     const [level, setLevel] = useState(1)
@@ -31,22 +32,31 @@ export default function Game() {
 
     // Send a request to retrieve a new game when the game is first launched or when a new level is reached
     useEffect(() => {
-        (async () => {
+    
+        (async ()=>{
             setGameObj({
                 question: '',
                 solution: ''
             })
 
             try {
-                const response = await fetch('/api/game/newgame')
-                const gameData = await response.json()
-                console.log(gameData)
-                setGameObj(gameData)
-                refreshCubes()
-            } catch (e) {
+                const response = await axios.get('/api/game/newgame',{
+                     headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+                }})
+
+                if(response.status ===200){
+                    console.log(response.data)
+                    setGameObj(response.data)
+                    refreshCubes()
+                }
+            }catch(error){
+                console.log(error.message)
                 console.log("can't load game data")
             }
         })()
+
 
     }, [level])
 
@@ -75,17 +85,18 @@ export default function Game() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await fetch('/api/users/store-score',
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ score: currentScore })
+                const response = await axios.post('/api/users/store-score',{ 
+                    score: currentScore 
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     }
+                }
                 )
             } catch (e) {
-                console.log(e)
+                console.log(e.message)
             }
         })()
     }, [currentScore]);

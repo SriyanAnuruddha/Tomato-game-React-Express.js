@@ -24,8 +24,7 @@ router.get('/newgame', validateToken, async (req, res) => {
 router.get('/quote', validateToken, async (req, res) => {
     try {
         const quoteResponse = await axios.get("https://zenquotes.io/api/random")
-        const quoteObj = await quoteResponse.data
-        console.log(quoteObj)
+        const quoteObj = quoteResponse.data
         res.json({
             quote: quoteObj[0].q,
             person: quoteObj[0].a

@@ -19,8 +19,10 @@ export default function SingUp() {
             }})
 
             if(response.status ===200){
-                login(response.data)
+                const {userData,access_token} =response.data
+                login(userData)
                 changeAuthType(3)
+                localStorage.setItem("accessToken",access_token)
             }
     
         }catch(error){

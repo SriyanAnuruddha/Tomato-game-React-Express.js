@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import ListGroup from 'react-bootstrap/ListGroup';
 import Card from 'react-bootstrap/Card';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function GameWonModal(props) {
     const [quoteObj, setQuoteObj] = useState({})
@@ -11,9 +12,19 @@ export default function GameWonModal(props) {
     // request a quote from back-end server
     useEffect(() => {
         (async () => {
-            const response = await fetch("/api/game/quote")
-            const quote = await response.json();
-            setQuoteObj(quote)
+            try{
+                const response = await axios.get("/api/game/quote",
+                {
+                    headers:{
+                        "Content-Type": "application/json",
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+                    }
+                })
+                const quote = response.data;
+                setQuoteObj(quote)
+            }catch(error){
+                console.log("can't get quote")
+            }
         })()
     }, [props.gameInfo.finishedLevel])
 

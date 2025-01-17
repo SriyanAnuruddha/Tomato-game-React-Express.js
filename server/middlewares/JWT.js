@@ -13,7 +13,7 @@ const createTokens = (user) => {
 
 // This function will check if the user request has a JWT token
 const validateToken = (req, res, next) => {
-    const accessToken = req.cookies["access-token"]
+    const accessToken = req.headers.authorization.split(" ")[1]
 
     if (!accessToken) {
         return res.status(400).json({ error: "user is not authenticated!" })

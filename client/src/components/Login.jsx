@@ -18,8 +18,11 @@ export default function Login() {
             }})
 
             if(response.status ===200){
-                login(response.data)
+                const { userData, access_token } = response.data
+                login(userData)
                 changeAuthType(2)
+
+                localStorage.setItem("accessToken",access_token)
             }
     
         }catch(error){

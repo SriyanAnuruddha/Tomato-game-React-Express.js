@@ -41,7 +41,7 @@ router.post("/register", async (req, res) => {
 
         const accessToken = createTokens({ username: username, email: email }); // Create a new JWT token
         res.cookie("access-token", accessToken, { maxAge: 60 * 30 * 1000 }); // Create a new cookie, store the JWT token in it, and then send the cookie to the front end for storage
-        res.json({ username: username, email: email, isAuthenticated: true });
+        res.json({ userData:{username, email, isAuthenticated: true}, access_token:accessToken });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
@@ -69,7 +69,7 @@ router.post("/login", async (req, res) => {
         } else {
             const accessToken = createTokens(user) // Create the JWT token for the user
             res.cookie("access-token", accessToken, { maxAge: 60 * 30 * 1000 }) // This will create cookie in clients browswer(maxAge is expriation time for the cookie)
-            res.json({ username: user.username, email: user.email, isAuthenticated: true });
+            res.json({ userData:{username: user.username, email: user.email, isAuthenticated: true}, access_token:accessToken });
         }
     })
 });
@@ -82,13 +82,6 @@ router.get("/authenticate", validateToken, (req, res) => {
         isAuthenticated: req.authenticated
     })
 })
-
-// handle logut
-router.get("/logout", validateToken, (req, res) => {
-    const accessToken = req.cookies["access-token"];
-    res.clearCookie("access-token").json({ message: "Logged out successfully" }); // Removes cookie from the front end
-})
-
 
 
 // return all the users

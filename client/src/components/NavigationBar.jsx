@@ -15,15 +15,6 @@ export default function NavigationBar() {
     function handleLogout(event) {
         changeAuthType(0)
         logout(); // reset login context
-        // clear the token from cookies after logging out
-        (async () => {
-            try {
-                const response = await fetch('/api/users/logout')
-                const message = await response.json();
-            } catch (e) {
-                console.log("can't logout")
-            }
-        })()
     }
 
     // Handle how to play button click
